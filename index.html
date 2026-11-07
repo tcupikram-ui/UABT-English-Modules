@@ -12,14 +12,16 @@
 <meta property="og:title" content="Ms Ikram's Classroom - Tlemcen">
 <meta property="og:description" content="English Oral Expression and English for Master's in Genetics - lessons by Ms Ikram BOUDAOUD, Faculty of Medicine Dr. B. Benzerdjeb.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://tcupikram-ui.github.io/UABT-English-Modules/">
-<meta property="og:image" content="https://tcupikram-ui.github.io/UABT-English-Modules/og-preview.png">
+<meta property="og:url" content="https://uabt.ikrambd.com/">
+<meta property="og:image" content="https://uabt.ikrambd.com/og-preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ms Ikram's Classroom - English lessons, University of Tlemcen">
+<meta property="og:site_name" content="Ms Ikram's Classroom">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Ms Ikram's Classroom - Tlemcen">
 <meta name="twitter:description" content="English Oral Expression and English for Master's in Genetics - lessons by Ms Ikram BOUDAOUD.">
-<meta name="twitter:image" content="https://tcupikram-ui.github.io/UABT-English-Modules/og-preview.png">
+<meta name="twitter:image" content="https://uabt.ikrambd.com/og-preview.png">
 <style>
 /* Palette taken from the cartoon: cream paper, taupe hijab/coat, brick scarf, mustard, dusty blue, blush pink */
 :root{
@@ -495,20 +497,26 @@ function toggleFull() {
 let _ipEvt = null;
 const _httpSite = () => /^https?:$/.test(location.protocol);
 const _standalone = () => (matchMedia('(display-mode: standalone)').matches || navigator.standalone === true);
+const _installed = () => { try { return localStorage.getItem('pwaInstalled') === '1' } catch (e) { return false } };
+const _markInstalled = () => { try { localStorage.setItem('pwaInstalled', '1') } catch (e) {} };
 function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 3000) }
 function updateInstallBtn() {
   const b = $('#btnInstall'); if (!b) return;
-  if (_standalone()) { b.style.display = 'none'; return }   /* already installed */
+  /* fully hide the button once the app is installed (any platform) */
+  if (_standalone() || _installed()) { b.style.display = 'none'; return }
   if (_ipEvt) { b.style.display = ''; b.title = 'Install ' + document.title + ' on this device'; return }
   b.style.display = ''; b.title = 'Open this site in Chrome/Edge/Safari to install it as an app';
 }
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); _ipEvt = e; updateInstallBtn() });
-window.addEventListener('appinstalled', () => { _ipEvt = null; updateInstallBtn(); toast('🎉 App installed! Open it from your home screen or desktop.') });
+window.addEventListener('beforeinstallprompt', e => {
+  if (_installed()) { e.preventDefault(); return }
+  _ipEvt = e; updateInstallBtn();
+});
+window.addEventListener('appinstalled', () => { _markInstalled(); _ipEvt = null; updateInstallBtn(); toast('🎉 App installed! Open it from your home screen or desktop.') });
 function installApp() {
-  if (_standalone()) return;
+  if (_standalone() || _installed()) return;
   if (_ipEvt) {
     _ipEvt.prompt();
-    _ipEvt.userChoice.then(() => { _ipEvt = null; updateInstallBtn() });
+    _ipEvt.userChoice.then(ch => { if (ch && ch.outcome === 'accepted') _markInstalled(); _ipEvt = null; updateInstallBtn() });
     sndOpen(); return;
   }
   sndOpen();
@@ -554,8 +562,8 @@ if ('serviceWorker' in navigator && _httpSite()) {
 /* ---------- hide splash screen ---------- */
 (function hideSplash() {
   const done = () => { const s = $('#splash'); if (!s) return; s.classList.add('off'); setTimeout(() => s.remove(), 700) };
-  if (document.readyState === 'complete') { setTimeout(done, 550) }
-  else { addEventListener('load', () => setTimeout(done, 550)); setTimeout(done, 2600) }   /* never trap the user */
+  if (document.readyState === 'complete') { setTimeout(done, 1600) }
+  else { addEventListener('load', () => setTimeout(done, 1600)); setTimeout(done, 4500) }   /* never trap the user */
 })();
 document.addEventListener('fullscreenchange', () => { $('#sFull').textContent = document.fullscreenElement ? '⛶ Exit fullscreen' : '⛶ Fullscreen' });
 addEventListener('keydown', e => { if (e.key === 'Escape') closeSession() });
@@ -578,7 +586,7 @@ $('#me').addEventListener('click', e => {
   clearTimeout(bt); bt = setTimeout(() => b.classList.remove('on'), 2600);
   burst(e.clientX, e.clientY, 50);
 });
-setTimeout(() => { const b = $('#bubble'); b.textContent = 'Welcome! 👋'; b.classList.add('on'); setTimeout(() => b.classList.remove('on'), 2400) }, 900);
+/* (automatic welcome bubble removed — the avatar greets only when clicked) */
 </script>
 </body>
 </html>
