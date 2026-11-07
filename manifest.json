@@ -1,0 +1,15 @@
+{
+  "name": "Ms Ikram's Classroom · Tlemcen",
+  "short_name": "Ms Ikram",
+  "description": "English lessons hub — University of Abou Bekr Belkaid, Tlemcen · Faculty of Medicine Dr. B. Benzerdjeb",
+  "start_url": "./Index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fffaf4",
+  "theme_color": "#e6b058",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
