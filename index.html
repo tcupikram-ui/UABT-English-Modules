@@ -232,6 +232,7 @@ canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:99}
 }
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
+<script>window.__dip=null;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__dip=e});</script>
 </head>
 <body>
 <div id="splash">
@@ -499,21 +500,24 @@ const _httpSite = () => /^https?:$/.test(location.protocol);
 const _standalone = () => (matchMedia('(display-mode: standalone)').matches || navigator.standalone === true);
 function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 3000) }
 
-/* Install app (PWA) — button is shown whenever not installed, so it never "disappears" */
+/* Install app (PWA) — button is shown whenever not installed, so it never "disappears".
+   The beforeinstallprompt event is captured early in <head> (window.__dip) so desktop
+   Chrome, which fires it before this late script runs, is not missed. */
 if ('serviceWorker' in navigator) { try { navigator.serviceWorker.register('./sw.js') } catch (e) {} }
-var inst = document.getElementById('install'), dip = null;
+var inst = document.getElementById('install');
 try { inst.hidden = (window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true) } catch (e) { inst.hidden = false }
-window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); dip = e });
 inst.addEventListener('click', function () {
+  var dip = window.__dip;
   if (dip) {
     dip.prompt();
-    if (dip.userChoice) dip.userChoice.then(function (r) { if (r.outcome === 'accepted') { inst.hidden = true; dip = null } })
+    if (dip.userChoice) dip.userChoice.then(function (r) { if (r.outcome === 'accepted') { inst.hidden = true; window.__dip = null } })
   } else {
-    inst.textContent = 'Tap ⋮ → Install app';
+    var touch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    inst.textContent = touch ? 'Tap ⋮ → Install app' : 'Use ⋮ menu → Install app';
     setTimeout(function () { inst.textContent = '📲 Install the app' }, 3000)
   }
 });
-window.addEventListener('appinstalled', function () { inst.hidden = true; dip = null });
+window.addEventListener('appinstalled', function () { inst.hidden = true; window.__dip = null });
 function closeSharePop() { sndClose(); $('#sharePop').classList.remove('on') }
 function shareSite() {
   sndOpen();
